@@ -197,10 +197,11 @@ class PuppeteerExtraPluginHumanTyping extends PuppeteerExtraPlugin {
 
     const maximumDelayInMs = options.maximumDelayInMs || this.opts.maximumDelayInMs;
     const minimumDelayInMs = options.minimumDelayInMs || this.opts.minimumDelayInMs;
+    const chanceToKeepATypoInPercent = options.chanceToKeepATypoInPercent || this.opts.chanceToKeepATypoInPercent;
 
     for (const character of typingFlow) {
       if (character === BACKSPACE) {
-        if (this._getRandomIntegerBetween(0, 100) > this.options.chanceToKeepATypoInPercent) {
+        if (this._getRandomIntegerBetween(0, 100) > chanceToKeepATypoInPercent) {
           continue;
         }
 
