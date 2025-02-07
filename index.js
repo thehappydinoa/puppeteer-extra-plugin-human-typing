@@ -17,7 +17,6 @@ class PuppeteerExtraPluginHumanTyping extends PuppeteerExtraPlugin {
     return {
       backspaceMaximumDelayInMs: 750 * 2,
       backspaceMinimumDelayInMs: 750,
-      chanceToKeepATypoInPercent: 0,
       keyboardLayout: "de",
       keyboardLayouts: {
         de: [
@@ -35,7 +34,6 @@ class PuppeteerExtraPluginHumanTyping extends PuppeteerExtraPlugin {
       },
       maximumDelayInMs: 650,
       minimumDelayInMs: 150,
-      typoChanceInPercent: 15,
     };
   }
 
@@ -149,29 +147,7 @@ class PuppeteerExtraPluginHumanTyping extends PuppeteerExtraPlugin {
       const character = characters[i];
       const characterLowerCased = character.toLowerCase();
 
-      /** We take one third of "typoChanceInPercent" to write a space twice. However, we will not remove this one. */
-      const hasSpaceTypo = character === " " && this._getRandomIntegerBetween(0, 100) <= this.opts.typoChanceInPercent / 3;
-
-      if (hasSpaceTypo) {
-        typingFlow.push(" ");
-      }
-
-      const hasTypo = this._isInKeyboardLayout(characterLowerCased) && this._getRandomIntegerBetween(0, 100) <= this.opts.typoChanceInPercent;
-
-      if (hasTypo) {
-        typingFlow.push(this._getCharacterCloseTo(character));
-        typingFlow.push(BACKSPACE);
-      }
-
       typingFlow.push(character);
-
-      /** We take half of "typoChanceInPercent" to write a character twice. */
-      const hasDoubleCharacterTypo = this._isInKeyboardLayout(characterLowerCased) && this._getRandomIntegerBetween(0, 100) <= this.opts.typoChanceInPercent / 2;
-
-      if (hasDoubleCharacterTypo) {
-        typingFlow.push(character);
-        typingFlow.push(BACKSPACE);
-      }
     }
 
     return typingFlow;
@@ -197,14 +173,9 @@ class PuppeteerExtraPluginHumanTyping extends PuppeteerExtraPlugin {
 
     const maximumDelayInMs = options.maximumDelayInMs || this.opts.maximumDelayInMs;
     const minimumDelayInMs = options.minimumDelayInMs || this.opts.minimumDelayInMs;
-    const chanceToKeepATypoInPercent = options.chanceToKeepATypoInPercent || this.opts.chanceToKeepATypoInPercent;
 
     for (const character of typingFlow) {
       if (character === BACKSPACE) {
-        if (this._getRandomIntegerBetween(0, 100) > chanceToKeepATypoInPercent) {
-          continue;
-        }
-
         await this._delay(this._getRandomIntegerBetween(backspaceMinimumDelayInMs, backspaceMaximumDelayInMs));
 
         await page.keyboard.press(character, {
